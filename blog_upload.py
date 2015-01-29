@@ -23,10 +23,39 @@ def get_keys(config_fnm):
             "secret_key": defaults["secret_key"]}
 
 def get_bucket(config_fnm):
+    """Get the config bucket name.
+
+    Params:
+      config_fnm - Name of the config file
+
+    Returns:
+      string - The configured bucket name
+    """
     parser = cp.RawConfigParser()
     parser.read(config_fnm)
     defaults = parser.defaults()
     return defaults["bucket"]
+
+def make_path_func(config_fnm):
+    """A higher-order function to parse a bare image filename.
+
+    Takes input from the config for the location of photos.
+
+    Param:
+      config_fnm - Name of the config file
+
+    Returns:
+      function - A unary function accepting a filename in the
+        form of YYYY-MM-DD HH:MM:SS
+    """
+    parser = cp.RawConfigParser()
+    parser.read(config_fnm)
+    defaults = parser.defaults()
+    local_dir = defaults["local_dir"]
+    def f(fnm):
+        ym = ''.join(fnm.split('-')[0:2])
+        return os.sep.join([local_dir, ym, fnm])
+    return f
 
 def upload(abs_fnm, bucket, s3conn):
     """Uploads a single file to the configured s3 bucket.
