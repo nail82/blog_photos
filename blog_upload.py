@@ -6,6 +6,20 @@ from boto.s3.key import Key as S3Key
 from boto.s3.bucket import Bucket as S3Bucket
 import configparser as cp
 import urllib
+import functools as ft
+
+def open_s3_connection(access_key, secret):
+    """Opens and returns a connection to s3
+
+    Params:
+      access_key - Access key from config.
+      secret_key - Secret key from config.
+
+    Returns:
+      connection - A connection to S3
+    """
+    return S3Connection(access_key, secret)
+
 
 def get_keys(config_fnm):
     """Parses a config file and returns s3 credentials.
@@ -57,7 +71,7 @@ def make_path_func(config_fnm):
         return os.sep.join([local_dir, ym, fnm])
     return f
 
-def upload(abs_fnm, bucket, s3conn):
+def upload(bucket, abs_fnm, s3conn):
     """Uploads a single file to the configured s3 bucket.
 
     A file is stored in reduced redundancy, with
@@ -86,3 +100,14 @@ def upload(abs_fnm, bucket, s3conn):
     url = urllib.parse.urljoin(baseurl, urlpath)
     plus = urllib.parse.unquote(urllib.parse.quote_plus(url))
     return plus if local_size == up_size else ""
+
+def bucket_upload_func(bucket):
+    """Higer order that partially applies a bucket to upload.
+
+    Params:
+      bucket - A bucket name
+
+    Returns:
+      An upload function with the bucket name frozen.
+    """
+    return ft.partial(upload, bucket)
