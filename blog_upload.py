@@ -23,6 +23,9 @@ def open_s3_connection(access_key, secret):
     """
     return S3Connection(access_key, secret)
 
+def validate_file(abs_fnm):
+    return os.path.exists(abs_fnm)
+
 
 def get_keys(config_fnm):
     """Parses a config file and returns s3 credentials.

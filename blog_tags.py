@@ -8,6 +8,8 @@ import sys
 import os
 import blog_upload as bu
 import datetime as dt
+from pandas import Series
+import numpy as np
 
 OUTPUT_DIR = os.getenv("HOME") + "/tmp"
 OUTPUT_FNM = os.sep.join(
@@ -33,8 +35,17 @@ def main():
 
     image_list = open(sys.argv[1]).readlines()
     image_list = [x.strip() for x in image_list]
+    abs_image_list = Series([path_func(x) for x in image_list])
+    valid_idx = np.array([bu.validate_file(x) for x in abs_image_list])
 
-    abs_image_list = [path_func(x) for x in image_list]
+    # Check for valid files
+    if sum(valid_idx) != len(abs_image_list):
+        print("Hit " + str(len(abs_image_list) - sum(valid_idx)) + " invalid files:")
+        invalid_list = abs_image_list[~valid_idx]
+        for f in invalid_list:
+            print(f)
+        sys.exit(1)
+
     image_shapes = [bu.get_image_shape(x) for x in abs_image_list]
     blog_shapes = [bu.image_blog_shape(x) for x in image_shapes]
     links = [link_func(x) for x in image_list]
