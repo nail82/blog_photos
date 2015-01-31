@@ -119,12 +119,13 @@ def image_link(bucket, fnm):
 def make_link_func(bucket):
     return ft.partial(image_link, bucket)
 
-def image_tag(image_link, imshape):
+def image_tag(link_shape_tup):
+    image_link, imshape = link_shape_tup
     w,h = imshape
     base_link = """<div class="separator" style="clear: both; text-align: center;"><a href="{0}" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="{2}" src="{0}" width="{1}" /></a></div>"""
     return base_link.format(image_link, w, h) if image_link != '' else ''
 
-def image_blog_size(imshape):
+def image_blog_shape(imshape):
     """Compute blog width and height for an image.
 
     Params:
@@ -149,3 +150,6 @@ def image_blog_size(imshape):
 
     scale = compute_scale()
     return ( int(np.ceil(w*scale)), int(np.ceil(h*scale)) )
+
+def get_image_shape(abs_fnm):
+    return Image.open(abs_fnm).size
