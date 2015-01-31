@@ -73,7 +73,7 @@ def make_path_func(config_fnm):
         return os.sep.join([local_dir, ym, fnm])
     return f
 
-def upload(bucket, abs_fnm, s3conn):
+def upload(bucket, s3conn, abs_fnm):
     """Uploads a single file to the configured s3 bucket.
 
     A file is stored in reduced redundancy, with
@@ -99,7 +99,7 @@ def upload(bucket, abs_fnm, s3conn):
         , policy="public-read")
     return fnm if local_size == up_size else ""
 
-def make_upload_func(bucket):
+def make_upload_func(bucket, conn):
     """Higer order that partially applies a bucket to upload.
 
     Params:
@@ -108,7 +108,7 @@ def make_upload_func(bucket):
     Returns:
       An upload function with the bucket name frozen.
     """
-    return ft.partial(upload, bucket)
+    return ft.partial(upload, bucket, conn)
 
 def image_link(bucket, fnm):
     baseurl = "https://s3.amazonaws.com"

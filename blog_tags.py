@@ -27,7 +27,7 @@ def main():
 
     cfg = "/Users/tsatcher/.s3_backup/blog_config.ini"
     path_func = bu.make_path_func(cfg)
-    upload_func = bu.make_upload_func(bu.get_bucket(cfg))
+
     access, secret = bu.get_keys(cfg)
     link_func = bu.make_link_func(bu.get_bucket(cfg))
 
@@ -41,11 +41,17 @@ def main():
     link_shape_data = [v for v in zip(links, blog_shapes)]
     tags = [bu.image_tag(x) for x in link_shape_data]
 
+    print("Uploading files...")
+
+    conn = bu.open_s3_connection(access, secret)
+    upload_func = bu.make_upload_func(bu.get_bucket(cfg), conn)
+    uploaded = [upload_func(x) for x in abs_image_list]
+
     output = open(OUTPUT_FNM, 'w')
     output.write(os.linesep.join(tags))
     output.write(os.linesep)
     output.close()
-    print("Output is in " + OUTPUT_FNM)
+    print("Tag output in " + OUTPUT_FNM)
 
 
 
