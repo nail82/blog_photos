@@ -7,6 +7,9 @@ from boto.s3.bucket import Bucket as S3Bucket
 import configparser as cp
 import urllib
 import functools as ft
+from PIL import Image
+import numpy as np
+
 
 def open_s3_connection(access_key, secret):
     """Opens and returns a connection to s3
@@ -28,13 +31,12 @@ def get_keys(config_fnm):
       config_fnm - Name of the config file
 
     Returns:
-      dict - A dictionary with acces_key and secret_key
+      A tuple of access_key and secret_key.
     """
     parser = cp.RawConfigParser()
     parser.read(config_fnm)
     defaults = parser.defaults()
-    return {"access_key": defaults["access_key"],
-            "secret_key": defaults["secret_key"]}
+    return (defaults["access_key"], defaults["secret_key"])
 
 def get_bucket(config_fnm):
     """Get the config bucket name.
@@ -95,11 +97,7 @@ def upload(bucket, abs_fnm, s3conn):
           abs_fnm
         , reduced_redundancy=True
         , policy="public-read")
-    baseurl = "https://s3.amazonaws.com"
-    urlpath = "/".join([bucket, fnm])
-    url = urllib.parse.urljoin(baseurl, urlpath)
-    plus = urllib.parse.unquote(urllib.parse.quote_plus(url))
-    return plus if local_size == up_size else ""
+    return image_link(bucket, fnm) if local_size == up_size else ""
 
 def bucket_upload_func(bucket):
     """Higer order that partially applies a bucket to upload.
@@ -111,3 +109,48 @@ def bucket_upload_func(bucket):
       An upload function with the bucket name frozen.
     """
     return ft.partial(upload, bucket)
+
+def image_link(bucket, fnm):
+    baseurl = "https://s3.amazonaws.com"
+    urlpath = "/".join([bucket, fnm])
+    return urllib.parse.unquote(
+        urllib.parse.quote_plus(urllib.parse.urljoin(baseurl, urlpath)))
+
+def make_link_func(bucket):
+    return ft.partial(image_link, bucket)
+
+def image_tag(image_link, height, width):
+    base_link = """<div class="separator" style="clear: both; text-align: center;">
+  <a href="{0}" imageanchor="1" style="margin-left: 1em; margin-right: 1em;">
+  <img border="0" height="{1}" src="{0}" width="{2}" />
+</a>
+</div>"""
+    return base_link.format(image_link, height, width)
+
+def image_blog_size(abs_fnm):
+    """Compute blog width and height for an image.
+
+    Params:
+      abs_fnm - Absolute path to an image file.
+
+    Returns:
+      A tuple of width, height
+    """
+    LANDSCAPE_WIDTH = 320
+    PORTRAIT_WIDTH  = 240
+    MAX_WIDTH       = 480
+
+    im = Image.open(abs_fnm)
+    w,h = im.size
+    im.close()
+    wh_ratio = float(w) / h
+
+    def compute_scale():
+        if wh_ratio < 1:
+            return PORTRAIT_WIDTH / w
+        if 1 <= wh_ratio < 1.5:
+            return LANDSCAPE_WIDTH / w
+        return LANDSCAPE_WIDTH / w
+
+    scale = compute_scale()
+    return ( int(np.ceil(w*scale)), int(np.ceil(h*scale)) )
