@@ -97,9 +97,9 @@ def upload(bucket, abs_fnm, s3conn):
           abs_fnm
         , reduced_redundancy=True
         , policy="public-read")
-    return image_link(bucket, fnm) if local_size == up_size else ""
+    return fnm if local_size == up_size else ""
 
-def bucket_upload_func(bucket):
+def make_upload_func(bucket):
     """Higer order that partially applies a bucket to upload.
 
     Params:
@@ -114,16 +114,17 @@ def image_link(bucket, fnm):
     baseurl = "https://s3.amazonaws.com"
     urlpath = "/".join([bucket, fnm])
     return urllib.parse.unquote(
-        urllib.parse.quote_plus(urllib.parse.urljoin(baseurl, urlpath)))
+        urllib.parse.quote_plus(urllib.parse.urljoin(baseurl, urlpath))) if fnm != '' else ''
 
 def make_link_func(bucket):
     return ft.partial(image_link, bucket)
 
-def image_tag(image_link, height, width):
-    base_link = """<div class="separator" style="clear: both; text-align: center;"><a href="{0}" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="{1}" src="{0}" width="{2}" /></a></div>"""
-    return base_link.format(image_link, height, width)
+def image_tag(image_link, imshape):
+    w,h = imshape
+    base_link = """<div class="separator" style="clear: both; text-align: center;"><a href="{0}" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="{2}" src="{0}" width="{1}" /></a></div>"""
+    return base_link.format(image_link, w, h) if image_link != '' else ''
 
-def image_blog_size(abs_fnm):
+def image_blog_size(imshape):
     """Compute blog width and height for an image.
 
     Params:
@@ -136,9 +137,7 @@ def image_blog_size(abs_fnm):
     PORTRAIT_WIDTH  = 240
     MAX_WIDTH       = 480
 
-    im = Image.open(abs_fnm)
-    w,h = im.size
-    im.close()
+    w,h = imshape
     wh_ratio = float(w) / h
 
     def compute_scale():
