@@ -16,7 +16,7 @@ OUTPUT_FNM = os.sep.join(
     [OUTPUT_DIR,
      dt.datetime.strftime(
          dt.datetime.utcnow(),
-            '%Y-%m-%d-blog.tags')])
+            '%Y-%m-%d-%H%M%S-blog.tags')])
 
 def main():
     if len(sys.argv) < 2:
