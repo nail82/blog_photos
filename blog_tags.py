@@ -11,12 +11,8 @@ import datetime as dt
 from pandas import Series
 import numpy as np
 
-OUTPUT_DIR = os.getenv("HOME") + "/tmp"
-OUTPUT_FNM = os.sep.join(
-    [OUTPUT_DIR,
-     dt.datetime.strftime(
-         dt.datetime.utcnow(),
-            '%Y-%m-%d-%H%M%S-blog.tags')])
+
+
 
 def main():
     if len(sys.argv) < 2:
@@ -28,6 +24,14 @@ def main():
         sys.exit(1)
 
     cfg = "/Users/tsatcher/.s3_backup/blog_config.ini"
+
+    OUTPUT_DIR = bu.get_temp(cfg)
+    OUTPUT_FNM = os.sep.join(
+        [OUTPUT_DIR,
+         dt.datetime.strftime(
+             dt.datetime.utcnow(),
+                 '%Y-%m-%d-%H%M%S-blog.tags')])
+
     path_func = bu.make_path_func(cfg)
 
     access, secret = bu.get_keys(cfg)

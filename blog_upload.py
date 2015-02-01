@@ -26,6 +26,12 @@ def open_s3_connection(access_key, secret):
 def validate_file(abs_fnm):
     return os.path.exists(abs_fnm)
 
+def get_temp(config_fnm):
+    parser = cp.RawConfigParser()
+    parser.read(config_fnm)
+    defaults = parser.defaults()
+    return defaults["temp_dir"]
+
 
 def get_keys(config_fnm):
     """Parses a config file and returns s3 credentials.
