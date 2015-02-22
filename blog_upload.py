@@ -109,7 +109,8 @@ def upload(bucket, s3conn, abs_fnm):
     return fnm if local_size == up_size else ""
 
 def make_upload_func(bucket, conn):
-    """Higer order that partially applies a bucket to upload.
+    """Higer order that partially applies a bucket to upload,
+    converting upload to a unary function.
 
     Params:
       bucket - A bucket name

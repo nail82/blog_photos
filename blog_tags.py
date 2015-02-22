@@ -39,10 +39,14 @@ def main():
         except IndexError as e:
             return ''
 
+    # Read the file
     lines = open(sys.argv[1]).readlines()
-    image_list = [x.split('|')[0].strip() for x in lines]
 
+    # Extract the file data
+    image_list = [x.split('|')[0].strip() for x in lines]
     caption_list = Series([caption_split_func(x) for x in lines])
+
+    # Resolve and validate the image files
     abs_image_list = Series([path_func(x) for x in image_list])
     valid_idx = np.array([bu.validate_file(x) for x in abs_image_list])
 
@@ -54,12 +58,17 @@ def main():
             print(f)
         sys.exit(1)
 
-    # The pipeline
+    # Image filenames become image shapes
     image_shapes = [bu.get_image_shape(x) for x in abs_image_list]
+    # Image shapes become blog shapes
     blog_shapes = [bu.image_blog_shape(x) for x in image_shapes]
+    # Non-absolute image names become links
     links = [link_func(x) for x in image_list]
+    # Links and blog shapes become image hrefs
     image_tags = [bu.image_tag(x) for x in zip(links, blog_shapes)]
+    # Captions become tags
     captions = [bu.make_caption_tag(x) for x in caption_list]
+    # Image and caption tags become blog html
     blog_html_list = [bu.wrap_image_link(x) for x in zip(image_tags, captions)]
 
     print("Uploading files...")
