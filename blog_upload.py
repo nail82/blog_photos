@@ -131,8 +131,20 @@ def make_link_func(bucket):
 def image_tag(link_shape_tup):
     image_link, imshape = link_shape_tup
     w,h = imshape
-    base_link = """<div class="separator" style="clear: both; text-align: center;"><a href="{0}" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="{2}" src="{0}" width="{1}" /></a></div>"""
+    base_link = """<a href="{0}" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="{2}" src="{0}" width="{1}" /></a>"""
     return base_link.format(image_link, w, h) if image_link != '' else ''
+
+def wrap_image_link(image_caption_tup):
+    image_tag, caption_tag = image_caption_tup
+    return div_wrap(image_tag) if caption_tag == '' else table_wrap(image_tag, caption_tag)
+
+def div_wrap(image_tag):
+    base_tag = """<div class="separator" style="clear: both; text-align: center;">{0}</div>"""
+    return base_tag.format(image_tag)
+
+def table_wrap(image_tag, caption_tag):
+    base_html = """<table align="center" cellpadding="0" cellspacing="0" class="tr-caption-container" style="margin-left: auto; margin-right: auto; text-align: center;"><tbody><tr><td style="text-align: center;">{0}</td></tr><tr>{1}</tr></tbody></table>"""
+    return base_html.format(image_tag, caption_tag)
 
 def image_blog_shape(imshape):
     """Compute blog width and height for an image.
@@ -162,3 +174,7 @@ def image_blog_shape(imshape):
 
 def get_image_shape(abs_fnm):
     return Image.open(abs_fnm).size
+
+def make_caption_tag(caption):
+    base_tag = """<td class="tr-caption" style="text-align: center;">{0}</td>"""
+    return base_tag.format(caption) if caption != '' else ''

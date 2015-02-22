@@ -11,9 +11,6 @@ import datetime as dt
 from pandas import Series
 import numpy as np
 
-
-
-
 def main():
     if len(sys.argv) < 2:
         print("Need a filename")
@@ -32,13 +29,20 @@ def main():
              dt.datetime.utcnow(),
                  '%Y-%m-%d-%H%M%S-blog.tags')])
 
-    path_func = bu.make_path_func(cfg)
-
     access, secret = bu.get_keys(cfg)
+    # Make some helper functions
     link_func = bu.make_link_func(bu.get_bucket(cfg))
+    path_func = bu.make_path_func(cfg)
+    def caption_split_func(x):
+        try:
+            return x.split('|')[1].strip()
+        except IndexError as e:
+            return ''
 
-    image_list = open(sys.argv[1]).readlines()
-    image_list = [x.strip() for x in image_list]
+    lines = open(sys.argv[1]).readlines()
+    image_list = [x.split('|')[0].strip() for x in lines]
+
+    caption_list = Series([caption_split_func(x) for x in lines])
     abs_image_list = Series([path_func(x) for x in image_list])
     valid_idx = np.array([bu.validate_file(x) for x in abs_image_list])
 
@@ -54,7 +58,10 @@ def main():
     blog_shapes = [bu.image_blog_shape(x) for x in image_shapes]
     links = [link_func(x) for x in image_list]
     link_shape_data = [v for v in zip(links, blog_shapes)]
-    tags = [bu.image_tag(x) for x in link_shape_data]
+    image_tags = [bu.image_tag(x) for x in link_shape_data]
+    captions = [bu.make_caption_tag(x) for x in caption_list]
+    image_caption_tups = [v for v in zip(image_tags, captions)]
+    blog_html_list = [bu.wrap_image_link(x) for  x in image_caption_tups]
 
     print("Uploading files...")
 
@@ -63,7 +70,7 @@ def main():
     uploaded = [upload_func(x) for x in abs_image_list]
 
     output = open(OUTPUT_FNM, 'w')
-    output.write(os.linesep.join(tags))
+    output.write(os.linesep.join(blog_html_list))
     output.write(os.linesep)
     output.close()
     print("Tag output in " + OUTPUT_FNM)
