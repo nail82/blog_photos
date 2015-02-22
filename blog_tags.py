@@ -54,14 +54,13 @@ def main():
             print(f)
         sys.exit(1)
 
+    # The pipeline
     image_shapes = [bu.get_image_shape(x) for x in abs_image_list]
     blog_shapes = [bu.image_blog_shape(x) for x in image_shapes]
     links = [link_func(x) for x in image_list]
-    link_shape_data = [v for v in zip(links, blog_shapes)]
-    image_tags = [bu.image_tag(x) for x in link_shape_data]
+    image_tags = [bu.image_tag(x) for x in zip(links, blog_shapes)]
     captions = [bu.make_caption_tag(x) for x in caption_list]
-    image_caption_tups = [v for v in zip(image_tags, captions)]
-    blog_html_list = [bu.wrap_image_link(x) for  x in image_caption_tups]
+    blog_html_list = [bu.wrap_image_link(x) for x in zip(image_tags, captions)]
 
     print("Uploading files...")
 
