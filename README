@@ -1,0 +1,7 @@
+A quicky to make getting photos on the blog easier.  Make a file, one photo per line, with
+line format looking something like these:
+
+2015-02-21 16:00:00 | A caption
+2015-02-21 12:23:12
+
+Note, the caption is optional, but must be pipe separated, if present.
