@@ -42,6 +42,9 @@ def main():
     # Read the file
     lines = open(sys.argv[1]).readlines()
 
+    # Filter empty lines
+    lines = [l.strip() for l in lines if l.strip() != '']
+
     # Extract the file data
     image_list = [x.split('|')[0].strip() for x in lines]
     caption_list = Series([caption_split_func(x) for x in lines])
