@@ -6,7 +6,7 @@ is another file of image tags to be pasted into the blog.
 """
 import sys
 import os
-import blog_upload as bu
+from bub_blog_upload import blog_upload as bu
 import datetime as dt
 from pandas import Series
 import numpy as np

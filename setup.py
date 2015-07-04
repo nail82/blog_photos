@@ -6,7 +6,7 @@ setup(
     version      = "0.3",
     author       = "Ted Satcher",
     author_email = "ted.satcher@gmail.com",
-    packages     = ['blog_upload'],
+    packages     = ['bub_blog_upload'],
     scripts      = ['blog_tags.py'],
     requires     = ['numpy','boto','PIL','pandas'],
 )
