@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name         = "blog_upload",
-    version      = "0.1",
+    version      = "0.3",
     author       = "Ted Satcher",
     author_email = "ted.satcher@gmail.com",
     packages     = ['blog_upload'],

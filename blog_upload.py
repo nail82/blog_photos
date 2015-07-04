@@ -71,7 +71,7 @@ def make_path_func(config_fnm):
 
     Returns:
       function - A unary function accepting a filename in the
-        form of YYYY-MM-DD HH:MM:SS
+        form of YYYY-MM-DD HH:MM:SS.jpg
     """
     parser = cp.RawConfigParser()
     parser.read(config_fnm)
@@ -109,8 +109,9 @@ def upload(bucket, s3conn, abs_fnm):
     return fnm if local_size == up_size else ""
 
 def make_upload_func(bucket, conn):
-    """Higer order that partially applies a bucket to upload,
-    converting upload to a unary function.
+    """Higer order that partially applies a bucket and
+    s3 connection to upload, converting upload to a
+    unary function.
 
     Params:
       bucket - A bucket name
@@ -151,7 +152,7 @@ def image_blog_shape(imshape):
     """Compute blog width and height for an image.
 
     Params:
-      abs_fnm - Absolute path to an image file.
+      imshape - The original shape of the image
 
     Returns:
       A tuple of width, height

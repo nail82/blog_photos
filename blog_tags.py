@@ -20,6 +20,8 @@ def main():
         print(sys.argv[1] + " doesn't seem to exist.")
         sys.exit(1)
 
+    rootname, _ = os.path.splitext(os.path.basename(fnm))
+
     cfg = "/Users/tsatcher/.s3_backup/blog_config.ini"
 
     OUTPUT_DIR = bu.get_temp(cfg)
@@ -27,7 +29,7 @@ def main():
         [OUTPUT_DIR,
          dt.datetime.strftime(
              dt.datetime.utcnow(),
-                 '%Y-%m-%d-%H%M%S-blog.tags')])
+                 '%Y%m%d-', rootname, '-blog.tags')])
 
     access, secret = bu.get_keys(cfg)
     # Make some helper functions
