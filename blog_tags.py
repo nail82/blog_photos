@@ -27,9 +27,10 @@ def main():
     OUTPUT_DIR = bu.get_temp(cfg)
     OUTPUT_FNM = os.sep.join(
         [OUTPUT_DIR,
+         '-'.join([
          dt.datetime.strftime(
              dt.datetime.utcnow(),
-                 '%Y%m%d-'), rootname, '-blog.tags'])
+                 '%Y%m%d'), rootname, 'blog.tags'])])
 
     access, secret = bu.get_keys(cfg)
     # Make some helper functions
