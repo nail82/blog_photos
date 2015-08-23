@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name         = "blog_upload",
-    version      = "0.4",
+    version      = "0.4.1",
     author       = "Ted Satcher",
     author_email = "ted.satcher@gmail.com",
     packages     = ['bub_blog_upload'],
