@@ -7,11 +7,23 @@ import pandas as pd
 import bub
 import pytz
 
+"""
+Rename a list of jpgs or other files based on a function of the file.
+
+Example:
+  # files is a list of absolute filenames.
+  import exif_date as ed
+  old_new = ed.zip_old_new(files, ed.stat_timestamp)
+  ed.rename_files(old_new)
+"""
+
 NAME_RE = re.compile("^complete name", re.IGNORECASE)
 DATE_RE = re.compile("^recorded date", re.IGNORECASE)
 AUCK_TZ = pytz.timezone("Pacific/Auckland")
 
 def mov_timestamp(fnm):
+    """Not working as of yet"""
+    assert(False)
     lines = open(fnm,'r').readlines()
 
     name_filt = lambda x: NAME_RE.search(x) is not None
@@ -22,13 +34,19 @@ def mov_timestamp(fnm):
     date_field = ':'.join(date_list).strip()
     ts = pd.to_datetime(date_field, utc=True, infer_datetime_format=True).tz_convert(AUCK_TZ)
 
-    return ts.strftime('%Y-%m-%d %H.%M.%S')
+    return None
 
-def jpg_timestamp(fnm):
+
+    """Return a timestamp as a function of the exif date in on the file."""
     im = Image.open(fnm)
     tags = im._getexif()
     return dt.datetime.strptime(
         tags[36867], '%Y:%m:%d %H:%M:%S').strftime('%Y-%m-%d %H.%M.%S')
+
+def stat_timestamp(fnm):
+    """Returns a timestamp as a function of the file mtime."""
+    return dt.datetime.fromtimestamp(
+        os.stat(fnm).st_mtime).strftime('%Y-%m-%d %H:%M:%S')
 
 def order_files(files, ts_func):
     """Orders a list of file tuples based on their exif timestamp.
@@ -66,7 +84,8 @@ def resolve_dups(ts_names, prev, suffix, resolved):
     Assumes ts_names are sorted in ascending order.
 
     Params:
-      ts_names - A list of timestamp names, which are a function of the exif timestamp.
+      ts_names - An ordered list of timestamp names, which are a function of the
+        exif timestamp, file mtimes, or some other function of the file.
       prev - The previous timestamp name.  Set to the empty string to start the recursion.
       suffix - The current suffix value.  Set to 0 to start the recursion.
       resolved - The accumulation list.  Set to the empty list to start the recursion.
@@ -111,7 +130,7 @@ def id(x):
 def strip_log(x):
     pass
 
-def zip_old_new(files):
+def zip_old_new(files, name_func):
     """Entry function for renaming a list of jpgs.
 
     Params:
@@ -120,7 +139,7 @@ def zip_old_new(files):
     Returns:
       A list of (old name, new name) tuples
     """
-    ordered_list = order_files(files, jpg_timestamp)
+    ordered_list = order_files(files, name_func)
     (ts_names, old_names, dir_names) = unzip_files(ordered_list)
     resolved = resolve_dups(ts_names, "", 0, [])
     new_names = abs_names(dir_names, resolved)
