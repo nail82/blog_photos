@@ -22,7 +22,7 @@ def main():
 
     rootname, _ = os.path.splitext(os.path.basename(sys.argv[1]))
 
-    cfg = "/Users/tsatcher/.s3_backup/blog_config.ini"
+    cfg = os.sep.join([os.getenv("HOME"), ".s3_backup/blog_config.ini"])
 
     OUTPUT_DIR = bu.get_temp(cfg)
     OUTPUT_FNM = os.sep.join(
