@@ -4,7 +4,6 @@ import datetime as dt
 import os
 import os.path
 import pandas as pd
-import bub
 import pytz
 
 """
@@ -43,6 +42,15 @@ def mov_timestamp(fnm):
     return dt.datetime.strptime(
         tags[36867], '%Y:%m:%d %H:%M:%S').strftime('%Y-%m-%d %H.%M.%S')
 
+def jpg_timestamp(fnm):
+    im = Image.open(fnm)
+    tags = im._getexif()
+    try:
+        return dt.datetime.strptime(
+            tags[36867], '%Y:%m:%d %H:%M:%S').strftime('%Y-%m-%d %H.%M.%S')
+    except KeyError as e:
+        return "1400-01-01 00.00.00"
+
 def stat_timestamp(fnm):
     """Returns a timestamp as a function of the file mtime."""
     return dt.datetime.fromtimestamp(
@@ -78,7 +86,7 @@ def unzip_files(zip_list):
     dir_names = [os.path.dirname(x[1]) for x in zip_list]
     return (ts_names, old_names, dir_names)
 
-def resolve_dups(ts_names, prev, suffix, resolved):
+def resolve_dups_old(ts_names, prev, suffix, resolved):
     """A recursive function to search and tag duplicates with a numbered suffix.
 
     Assumes ts_names are sorted in ascending order.
@@ -105,6 +113,23 @@ def resolve_dups(ts_names, prev, suffix, resolved):
         dup = '-'.join([head, str(suffix)])
         resolved = [dup] + resolved
         return resolve_dups(tail, head, suffix, resolved)
+
+def resolve_dups(ts_names):
+    """An iterative version for resolving dups."""
+    suffix = 0
+    resolved = ts_names.copy()
+
+    def myjoin(name, suffix):
+        if suffix == 0:
+            return name
+        else:
+            return "-".join([name, str(suffix)])
+
+    for i in range(1, len(ts_names)):
+        suffix = suffix + 1 if ts_names[i] == ts_names[i-1] else 0
+        resolved[i] = myjoin(ts_names[i], suffix)
+
+    return resolved
 
 
 def abs_names(dir_names, resolved):
@@ -141,9 +166,18 @@ def zip_old_new(files, name_func):
     """
     ordered_list = order_files(files, name_func)
     (ts_names, old_names, dir_names) = unzip_files(ordered_list)
-    resolved = resolve_dups(ts_names, "", 0, [])
+    resolved = resolve_dups(ts_names)
     new_names = abs_names(dir_names, resolved)
-    return [v for v in zip(old_names, new_names)]
+
+    date_flag_re = re.compile("1400-01-01 00\\.00\\.00")
+
+    def check_date_flag(tup):
+        """Check for a year 1400 flag, which signals an inability to
+        extract the date from exif data."""
+        mo = date_flag_re.search(tup[1])
+        return tup if mo is None else (tup[0], tup[0])
+
+    return [check_date_flag(v) for v in zip(old_names, new_names)]
 
 def rename_files(zip_list):
     """Given a list of (old,new) tuples, rename the files.
