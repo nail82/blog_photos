@@ -3,6 +3,8 @@
 
 Input is a simple text file of image files and output
 is another file of image tags to be pasted into the blog.
+
+I used this mechanism for my NZ blog.
 """
 import sys
 import os
